@@ -30,7 +30,7 @@ var loggerf = log.LoggerJSON().WithField("package", "main")
 // @BasePath /api/v1
 func main() {
 	e := echo.New()
-	e.GET("/api/v1/books/findAll", findAllBooksGet)
+	e.GET("/api/v1/books", findAllBooksGet)
 	e.POST("/api/v1/book", bookPost)
 	e.GET("/api/v1/book/:bookID", bookGet)
 	e.GET("/api/v1/book/:bookID/boxPrice", bookBoxPriceGet)
@@ -151,7 +151,7 @@ func bookBoxPriceGet(c echo.Context) error {
 
 	quantityIn := c.QueryParam("quantity")
 	if quantityIn == "" {
-		return c.JSON(http.StatusBadRequest, errs.BadRequest.SetMessage("Quantity is required"))
+		quantityIn = "6"
 	}
 	quantity, err := strconv.Atoi(quantityIn)
 	if err != nil {

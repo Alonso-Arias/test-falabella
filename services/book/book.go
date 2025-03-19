@@ -2,11 +2,13 @@ package book
 
 import (
 	"context"
+	"strings"
 
 	"github.com/Alonso-Arias/test-falabella/db/dao"
 	md "github.com/Alonso-Arias/test-falabella/db/model"
 	errs "github.com/Alonso-Arias/test-falabella/errors"
 	"github.com/Alonso-Arias/test-falabella/log"
+	currencylayer "github.com/Alonso-Arias/test-falabella/services/currency_layer"
 	"github.com/Alonso-Arias/test-falabella/services/model"
 	"gopkg.in/dealancer/validate.v2"
 	"gorm.io/gorm"
@@ -25,7 +27,7 @@ type FindAllBooksResponse struct {
 // FindAllBooks recupera todas las tareas.
 func (bk BookService) FindAllBooks(ctx context.Context) (FindAllBooksResponse, error) {
 	log := loggerf.WithField("service", "BookService").WithField("func", "FindAllBooks")
-
+	defer log.Info("end FindAllBooks")
 	BookDAO := dao.NewBookDAO()
 
 	Books, err := BookDAO.FindAll(ctx)
@@ -67,7 +69,7 @@ type GetBookResponse struct {
 // GetBook obtiene una tarea por su ID.
 func (bk BookService) GetBook(ctx context.Context, in GetBookRequest) (GetBookResponse, error) {
 	log := loggerf.WithField("service", "BookService").WithField("func", "GetBook")
-
+	defer log.Info("end GetBook")
 	if in.BookId == 0 {
 		return GetBookResponse{}, errs.BadRequest
 	}
@@ -106,16 +108,22 @@ type SaveBookResponse struct{}
 // SaveBook guarda una nueva tarea.
 func (bk BookService) SaveBook(ctx context.Context, in SaveBookRequest) (SaveBookResponse, error) {
 	log := loggerf.WithField("service", "BookService").WithField("func", "SaveBook")
-
+	defer log.Info("end SaveBook")
 	// Valida la solicitud de entrada
 	if err := validate.Validate(in); err != nil {
 		log.WithError(err).Error("validation problems")
 		return SaveBookResponse{}, errs.BadRequest
 	}
 
+	// validate currency
+	err := validateCurrency(in.Book.Currency)
+	if err != nil {
+		return SaveBookResponse{}, err
+	}
+
 	BookDAO := dao.NewBookDAO()
 
-	err := BookDAO.Save(ctx, md.Book(md.Book{
+	err = BookDAO.Save(ctx, md.Book(md.Book{
 		ID:        in.Book.ID,
 		Title:     in.Book.Title,
 		Author:    in.Book.Author,
@@ -146,9 +154,17 @@ type GetBookBoxPriceResponse struct {
 // GetBook obtiene una tarea por su ID.
 func (bk BookService) GetBookBoxPrice(ctx context.Context, in GetBookBoxPriceRequest) (GetBookBoxPriceResponse, error) {
 	log := loggerf.WithField("service", "BookService").WithField("func", "GetBook")
-
+	defer log.Info("end GetBookBoxPrice")
 	if in.BookId == 0 {
 		return GetBookBoxPriceResponse{}, errs.BadRequest
+	}
+
+	log.Infof("BookID: %d, Currency: %s, Quantity: %d", in.BookId, in.Currency, in.Quantity)
+
+	// validate currency
+	err := validateCurrency(in.Currency)
+	if err != nil {
+		return GetBookBoxPriceResponse{}, err
 	}
 
 	BookDAO := dao.NewBookDAO()
@@ -161,7 +177,34 @@ func (bk BookService) GetBookBoxPrice(ctx context.Context, in GetBookBoxPriceReq
 		return GetBookBoxPriceResponse{}, errs.BooksNotFound
 	}
 
-	totalPrice := v.Price * float64(in.Quantity)
+	amount := v.Price * float64(in.Quantity)
+
+	totalPrice, err := currencylayer.Convert(v.Currency, in.Currency, amount)
+	if err != nil {
+		log.WithError(err).Error("problems on convert currency")
+		return GetBookBoxPriceResponse{}, err
+	}
 
 	return GetBookBoxPriceResponse{TotalPrice: totalPrice}, nil
+}
+
+func validateCurrency(currency string) error {
+	currencies, err := currencylayer.GetCurrencies()
+	if err != nil {
+		return err
+	}
+
+	flag := false
+	for _, v := range currencies {
+		if strings.EqualFold(v, currency) {
+			flag = true
+			break
+		}
+	}
+
+	if !flag {
+		return errs.CurrencyNotFound
+	}
+
+	return nil
 }

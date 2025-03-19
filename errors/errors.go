@@ -35,4 +35,5 @@ var (
 
 	BooksNotFound    = CustomError{Message: "Books not found", Code: 404, InternalCode: "BOOKS_NOT_FOUND"}
 	BookAlreadySaved = CustomError{Message: "Book already saved", Code: 400, InternalCode: "BOOK_ALREADY_SAVED"}
+	CurrencyNotFound = CustomError{Message: "Currency not found", Code: 404, InternalCode: "CURRENCY_NOT_FOUND"}
 )

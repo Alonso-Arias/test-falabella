@@ -2,7 +2,10 @@
 TOOLS_DIR := tools
 
 # Variables de entorno
-ENV_VARS = MYSQL_CONNECTION=root:123456@tcp(localhost:3306)/TEST?parseTime=true \
+ENV_VARS = MYSQL_CONNECTION="root:123456@tcp(localhost:3306)/TEST?parseTime=true" \
+	       API_KEY="9efa9f3adefee7cdf3c4d5e14f3bed7b" \
+		   URL_BASE="http://apilayer.net/api"
+		 
 
 # Objetivo para correr la aplicación
 run:
@@ -21,7 +24,7 @@ lint: $(TOOLS_DIR)/golangci-lint/golangci-lint
 
 # Pruebas con cobertura
 test:
-	go test ./... -cover -coverprofile=coverage.out && go tool cover -func=coverage.out | grep total | awk '{print "Coverage: "$3}'
+	$(ENV_VARS) go test ./... -cover -coverprofile=coverage.out && go tool cover -func=coverage.out | grep total | awk '{print "Coverage: "$3}'
 
 # Generar un informe HTML de cobertura
 coverage: test
