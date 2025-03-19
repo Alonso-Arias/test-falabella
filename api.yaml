@@ -1,0 +1,148 @@
+openapi: 3.0.0
+servers: []
+info:
+  description: 'Prueba - sistema de información de biblioteca'
+  version: "1.0.0"
+  title: 'API Biblioteca'
+tags:
+  - name: libros
+    description: 'Gestión de libros en la biblioteca'
+paths:
+  /books:
+    get:
+      tags:
+        - libro
+      summary: Lista todos los libros
+      operationId: searchBooks
+      description: |
+        Lista todos los libros disponibles en la biblioteca
+      responses:
+        '200':
+          description: 'Operación exitosa'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookItem'
+    post:
+      tags:
+        - libro
+      summary: 'Ingresa un nuevo libro'
+      operationId: addBooks
+      description: 'Ingresa un nuevo libro en la biblioteca'
+      responses:
+        '201':
+          description: 'Libro agregado'
+        '400':
+          description: 'Solicitud inválida'
+        '409':
+          description: 'El ID del libro ya existe'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookItem'
+        description: 'Ingresa un nuevo libro'
+
+  /books/{bookID}:
+    get:
+      tags:
+        - libro
+      summary: Lista el detalle de un libro específico
+      operationId: searchBookById
+      description: |
+        Busca un libro por su ID en la biblioteca
+      parameters:
+        - name: bookID
+          in: path
+          description: 'Busca un libro por su ID'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Operación exitosa'
+        '404':
+          description: 'El ID del libro no existe'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookItem'
+
+  /books/{bookID}/boxprice:
+    get:
+      tags:
+        - libro
+      summary: Calcula el precio de una caja de libros
+      operationId: boxBookPriceById
+      description: |
+        Obtiene el precio de una caja con múltiples copias de un libro por su ID
+      parameters:
+        - name: bookID
+          in: path
+          description: 'Busca un libro por su ID'
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: currency
+          schema:
+            type: string
+          description: Tipo de moneda con la que se pagará
+        - in: query
+          name: quantity
+          schema:
+            type: integer
+            default: 6
+          description: La cantidad de libros a comprar
+      responses:
+        '200':
+          description: 'Operación exitosa'
+        '404':
+          description: 'El ID del libro no existe'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookBox'
+
+components:
+  schemas:
+    BookItem:
+      type: object
+      required:
+        - Id
+        - Title
+        - Author
+        - Publisher
+        - Country
+        - Price
+        - Currency
+      properties:
+        Id:
+          type: integer
+          example: 1
+        Title:
+          type: string
+          example: 'El Quijote'
+        Author:
+          type: string
+          example: 'Miguel de Cervantes'
+        Publisher:
+          type: string
+          example: 'Editorial Planeta'
+        Country:
+          type: string
+          example: 'España'
+        Price:
+          type: number
+          example: 20.5
+        Currency:
+          type: string
+          example: 'EUR'
+    BookBox:
+      type: object
+      properties:
+        TotalPrice:
+          type: number
+          example: 25
