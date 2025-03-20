@@ -1,0 +1,124 @@
+{
+	"info": {
+		"_postman_id": "1e7c3800-e500-451f-8bda-a30203be9162",
+		"name": "Test Falabella",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10868294"
+	},
+	"item": [
+		{
+			"name": "Get All Books",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:1323/api/v1/books",
+					"host": [
+						"localhost"
+					],
+					"port": "1323",
+					"path": [
+						"api",
+						"v1",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Book",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:1323/api/v1/book/:bookId",
+					"host": [
+						"localhost"
+					],
+					"port": "1323",
+					"path": [
+						"api",
+						"v1",
+						"book",
+						":bookId"
+					],
+					"variable": [
+						{
+							"key": "bookId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Book Box Price",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:1323/api/v1/book/:bookId/boxPrice?currency=USD&quantity=2",
+					"host": [
+						"localhost"
+					],
+					"port": "1323",
+					"path": [
+						"api",
+						"v1",
+						"book",
+						":bookId",
+						"boxPrice"
+					],
+					"query": [
+						{
+							"key": "currency",
+							"value": "USD"
+						},
+						{
+							"key": "quantity",
+							"value": "2"
+						}
+					],
+					"variable": [
+						{
+							"key": "bookId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post Book",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Book\": {\n        \"title\": \"Cien años de soledad\",\n        \"author\": \"Gabriel García Márquez\",\n        \"publisher\": \"Editorial Sudamericana\",\n        \"country\": \"Colombia\",\n        \"price\": 25.0,\n        \"currency\": \"USD\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:1323/api/v1/book",
+					"host": [
+						"localhost"
+					],
+					"port": "1323",
+					"path": [
+						"api",
+						"v1",
+						"book"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
